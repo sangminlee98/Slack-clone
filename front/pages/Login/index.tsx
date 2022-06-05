@@ -1,17 +1,13 @@
+import useInput from '@hooks/useInput';
 import { Success, Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const LogIn = () => {
   const [logInError, setLogInError] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const onChangeEmail = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  }, []);
-  const onChangePassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  }, []);
+  const [email, setEmail, onChangeEmail] = useInput('');
+  const [password, setPassword, onChangePassword] = useInput('');
+
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(email, password);
