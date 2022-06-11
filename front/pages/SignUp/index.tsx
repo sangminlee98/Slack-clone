@@ -1,7 +1,8 @@
 import useInput from '@hooks/useInput';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Form, Label, Input, LinkContainer, Button, Header, Error } from './styles';
+import { Form, Label, Input, LinkContainer, Button, Header, Error, Success } from './styles';
 
 const SignUp = () => {
   const [email, setEmail, onChangeEmail] = useInput('');
@@ -9,6 +10,8 @@ const SignUp = () => {
   const [password, setPassword, _1] = useInput('');
   const [passwordCheck, setPasswordCheck, _2] = useInput('');
   const [mismatchError, setMismatchError] = useState(false);
+  const [signUpError, setSignUpError] = useState('');
+  const [signUpSuccess, setSignUpSuccess] = useState('');
 
   const onChangePassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setMismatchError(e.target.value !== passwordCheck);
@@ -20,9 +23,22 @@ const SignUp = () => {
   }, [password]);
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if(!mismatchError) {
-      console.log(email, nickname, password, passwordCheck);
-    }
+    if(!mismatchError && nickname) {
+      console.log('서버로 회원가입하기기');
+      setSignUpError('');
+      setSignUpSuccess('');
+      axios.post('api/users', {
+        email, nickname, password
+      })
+      .then((response: AxiosResponse<any> ) => {
+        console.log(response);
+        setSignUpSuccess(response.data);
+      })
+      .catch((error: AxiosError) => {
+        console.log(error.response);
+        setSignUpError(error.response?.data as string);
+      }) 
+    };
   }, [email, nickname, password, passwordCheck]);
   return (
     <div id="container">
@@ -59,8 +75,8 @@ const SignUp = () => {
           </div>
           {mismatchError && <Error>비밀번호가 일치하지 않습니다.</Error>}
           {!nickname && <Error>닉네임을 입력해주세요.</Error>}
-          {/* {signUpError && <Error>{signUpError}</Error>}
-          {signUpSuccess && <Success>회원가입되었습니다! 로그인해주세요.</Success>} */}
+          {signUpError && <Error>{signUpError}</Error>}
+          {signUpSuccess && <Success>회원가입되었습니다! 로그인해주세요.</Success>}
         </Label>
         <Button type="submit">회원가입</Button>
       </Form>
