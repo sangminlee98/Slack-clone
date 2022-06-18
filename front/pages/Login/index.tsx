@@ -1,5 +1,6 @@
 import useInput from '@hooks/useInput';
 import { Success, Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
+import axios from 'axios';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,10 +8,21 @@ const LogIn = () => {
   const [logInError, setLogInError] = useState(false);
   const [email, setEmail, onChangeEmail] = useInput('');
   const [password, setPassword, onChangePassword] = useInput('');
-
+  const [errorMsg, setErrorMsg] = useState('');
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(email, password);
+    setLogInError(false);
+    axios.post('api/users/login', {
+      email,
+      password
+    })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((error) => {
+      setLogInError(true);
+      setErrorMsg(error.response.data);
+    })
   }, [email, password]);
 
   return (
@@ -28,7 +40,7 @@ const LogIn = () => {
           <div>
             <Input type="password" id="password" name="password" value={password} onChange={onChangePassword} />
           </div>
-          {logInError && <Error>이메일과 비밀번호 조합이 일치하지 않습니다.</Error>}
+          {logInError && <Error>{errorMsg}</Error>}
         </Label>
         <Button type="submit">로그인</Button>
       </Form>

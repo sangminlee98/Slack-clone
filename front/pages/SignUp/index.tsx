@@ -38,7 +38,7 @@ const SignUp = () => {
         console.log(error.response);
         setSignUpError(error.response?.data as string);
       }) 
-    };
+    }; 
   }, [email, nickname, password, passwordCheck]);
   return (
     <div id="container">
