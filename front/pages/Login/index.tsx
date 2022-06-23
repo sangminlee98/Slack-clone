@@ -1,10 +1,13 @@
 import useInput from '@hooks/useInput';
-import { Success, Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
+import { Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
 import axios from 'axios';
+import { fetcher } from '../../fetcher';
 import React, { useCallback, useState } from 'react';
+import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 
 const LogIn = () => {
+  const {data, error, isLoading} = useQuery('user-info',() => fetcher('http://localhost:3095/api/users'))
   const [logInError, setLogInError] = useState(false);
   const [email, setEmail, onChangeEmail] = useInput('');
   const [password, setPassword, onChangePassword] = useInput('');
@@ -12,9 +15,11 @@ const LogIn = () => {
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLogInError(false);
-    axios.post('api/users/login', {
+    axios.post('http://localhost:3095/api/users/login', {
       email,
       password
+    }, {
+      withCredentials: true
     })
     .then((res) => {
       console.log(res);
