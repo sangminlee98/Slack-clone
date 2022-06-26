@@ -1,35 +1,40 @@
 import useInput from '@hooks/useInput';
 import { Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
-import axios from 'axios';
-import { fetcher } from '../../fetcher';
+import axios, { AxiosError } from 'axios';
+import { fetcher } from '@utils/fetcher';
 import React, { useCallback, useState } from 'react';
-import { useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
+import {useMutation, useQuery, useQueryClient} from 'react-query';
+import { Link, Navigate } from 'react-router-dom';
+import { IUser } from '@typings/db';
 
 const LogIn = () => {
-  const {data, error, isLoading} = useQuery('user-info',() => fetcher('http://localhost:3095/api/users'))
+  const queryClient = useQueryClient();
+  const {data, error, isLoading} = useQuery<IUser>('user',() => fetcher('http://localhost:3095/api/users'));
+  const mutaion = useMutation<IUser, AxiosError<string>, {email: string, password: string}>('user', (data) => 
+    axios.post('http://localhost:3095/api/users/login', data, {withCredentials: true})
+    .then(res => res.data),
+    {
+      onMutate() {
+        setLogInError(false);
+      },
+      onSuccess() {
+        queryClient.refetchQueries('user');
+      },
+      onError(error) {
+        setLogInError(error.response?.status === 401);
+        setErrorMsg(error.response?.data || '');
+      }
+    }
+  )
   const [logInError, setLogInError] = useState(false);
   const [email, setEmail, onChangeEmail] = useInput('');
   const [password, setPassword, onChangePassword] = useInput('');
   const [errorMsg, setErrorMsg] = useState('');
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLogInError(false);
-    axios.post('http://localhost:3095/api/users/login', {
-      email,
-      password
-    }, {
-      withCredentials: true
-    })
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((error) => {
-      setLogInError(true);
-      setErrorMsg(error.response.data);
-    })
-  }, [email, password]);
-
+    mutaion.mutate({email, password});
+  }, [email, password, mutaion]);
+  if(data) return <Navigate replace to='/workspace/channel'/>
   return (
     <div id="container">
       <Header>Sleact</Header>

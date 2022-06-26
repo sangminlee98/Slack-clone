@@ -1,10 +1,13 @@
 import useInput from '@hooks/useInput';
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { fetcher } from '@utils/fetcher';
 import React, { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { Link, Navigate } from 'react-router-dom';
 import { Form, Label, Input, LinkContainer, Button, Header, Error, Success } from './styles';
 
 const SignUp = () => {
+  const {data} = useQuery('user', () => fetcher('http://localhost:3095/api/users'));
   const [email, setEmail, onChangeEmail] = useInput('');
   const [nickname, setNickname, onChangeNickname] = useInput('');
   const [password, setPassword, _1] = useInput('');
@@ -40,6 +43,7 @@ const SignUp = () => {
       }) 
     }; 
   }, [email, nickname, password, passwordCheck]);
+  if(data) return <Navigate replace to='/workspace/channel'/>
   return (
     <div id="container">
       <Header>Sleact</Header>
